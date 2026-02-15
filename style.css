@@ -5,70 +5,134 @@
 }
 
 body {
-    background-color: #FFE4E8;
     font-family: 'Nunito', sans-serif;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background-image:
-        radial-gradient(circle at 15% 85%, #ffb3c1 0%, transparent 40%),
-        radial-gradient(circle at 85% 15%, #ff8fa3 0%, transparent 40%),
-        radial-gradient(circle at 50% 50%, #fff0f3 0%, transparent 60%);
+    background: linear-gradient(135deg, #FFE4E8, #ffb3c1, #ffc8dd, #FFE4E8);
+    background-size: 400% 400%;
+    animation: gradientShift 10s ease infinite;
 }
 
-/* Floating hearts background */
-.hearts-bg {
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    25% {
+        background-position: 100% 0%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    75% {
+        background-position: 0% 100%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Canvas for particle hearts */
+#hearts-canvas {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     pointer-events: none;
     z-index: 0;
+}
+
+/* Sparkle cursor container */
+.sparkle-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 999;
     overflow: hidden;
 }
 
-.hearts-bg::before,
-.hearts-bg::after {
-    content: '💕 💗 💖 💝 💓';
+.sparkle {
     position: absolute;
-    font-size: 1.5rem;
-    opacity: 0.15;
-    animation: floatHearts 12s linear infinite;
-    white-space: nowrap;
-    top: 100%;
-    left: 10%;
+    pointer-events: none;
+    font-size: 14px;
+    animation: sparkleFade 0.8s ease-out forwards;
 }
 
-.hearts-bg::after {
-    animation-delay: 6s;
-    left: 60%;
-    content: '💗 💕 💓 💖 💝';
+@keyframes sparkleFade {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.2) translateY(-30px);
+    }
 }
 
-@keyframes floatHearts {
-    from { transform: translateY(0); opacity: 0.15; }
-    to { transform: translateY(-110vh); opacity: 0; }
-}
-
+/* Glassmorphism card */
 .container {
     position: relative;
     z-index: 1;
     text-align: center;
-    padding: 40px 20px;
+    padding: 50px 40px 40px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow:
+        0 8px 32px rgba(214, 51, 132, 0.15),
+        0 0 60px rgba(255, 105, 180, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    max-width: 520px;
+    width: 90vw;
+    animation: cardFloat 4s ease-in-out infinite;
 }
 
+@keyframes cardFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+/* Glowing heading */
 h1 {
     font-size: 2.4rem;
     color: #d63384;
     font-weight: 900;
     margin-bottom: 20px;
-    text-shadow: 2px 2px 0px rgba(214, 51, 132, 0.2);
-    animation: wiggle 2s ease-in-out infinite;
+    animation: wiggleGlow 2s ease-in-out infinite;
 }
 
-@keyframes wiggle {
-    0%, 100% { transform: rotate(-1deg); }
-    50% { transform: rotate(1deg); }
+@keyframes wiggleGlow {
+
+    0%,
+    100% {
+        transform: rotate(-1deg);
+        text-shadow: 0 0 10px rgba(214, 51, 132, 0.3), 2px 2px 0px rgba(214, 51, 132, 0.15);
+    }
+
+    50% {
+        transform: rotate(1deg);
+        text-shadow: 0 0 20px rgba(214, 51, 132, 0.5), 2px 2px 0px rgba(214, 51, 132, 0.15);
+    }
 }
 
 .gif-container {
@@ -81,8 +145,9 @@ h1 {
     width: 200px;
     height: 200px;
     object-fit: contain;
-    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.18));
     transition: opacity 0.3s ease;
+    border-radius: 16px;
 }
 
 .buttons {
@@ -94,7 +159,9 @@ h1 {
     flex-wrap: wrap;
 }
 
+/* Yes button with shimmer */
 #yes-btn {
+    position: relative;
     background: linear-gradient(135deg, #4CAF50, #45a049);
     color: white;
     border: none;
@@ -107,17 +174,59 @@ h1 {
     transition: transform 0.15s, box-shadow 0.15s;
     box-shadow: 0 6px 20px rgba(76, 175, 80, 0.45);
     letter-spacing: 1px;
+    overflow: hidden;
+    animation: heartbeatPulse 2s ease-in-out infinite;
+}
+
+#yes-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 40%;
+    height: 200%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.35),
+            transparent);
+    transform: skewX(-20deg);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+
+    0%,
+    100% {
+        left: -60%;
+    }
+
+    50% {
+        left: 120%;
+    }
+}
+
+@keyframes heartbeatPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.45);
+    }
+
+    50% {
+        box-shadow: 0 6px 30px rgba(76, 175, 80, 0.7), 0 0 50px rgba(76, 175, 80, 0.2);
+    }
 }
 
 #yes-btn:hover {
-    transform: scale(1.06) translateY(-2px);
-    box-shadow: 0 10px 28px rgba(76, 175, 80, 0.55);
+    transform: scale(1.08) translateY(-3px);
+    box-shadow: 0 10px 32px rgba(76, 175, 80, 0.6);
 }
 
 #yes-btn:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
 }
 
+/* No button */
 #no-btn {
     background: linear-gradient(135deg, #e74c3c, #c0392b);
     color: white;
@@ -128,7 +237,7 @@ h1 {
     font-family: 'Nunito', sans-serif;
     padding: 12px 28px;
     cursor: pointer;
-    transition: background 0.2s, left 0.25s ease, top 0.25s ease;
+    transition: background 0.2s, left 0.25s ease, top 0.25s ease, transform 0.3s ease;
     box-shadow: 0 4px 14px rgba(231, 76, 60, 0.4);
 }
 
@@ -136,7 +245,71 @@ h1 {
     background: linear-gradient(135deg, #c0392b, #a93226);
 }
 
+/* Runaway spin */
+#no-btn.spinning {
+    animation: spinJump 0.35s ease;
+}
 
+@keyframes spinJump {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(0.8);
+    }
+
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+/* Screen shake */
+.container.shake {
+    animation: screenShake 0.4s ease;
+}
+
+@keyframes screenShake {
+
+    0%,
+    100% {
+        transform: translateX(0) translateY(0);
+    }
+
+    10% {
+        transform: translateX(-6px) translateY(-2px);
+    }
+
+    20% {
+        transform: translateX(6px) translateY(2px);
+    }
+
+    30% {
+        transform: translateX(-4px) translateY(-4px);
+    }
+
+    40% {
+        transform: translateX(4px) translateY(1px);
+    }
+
+    50% {
+        transform: translateX(-2px) translateY(-1px);
+    }
+
+    60% {
+        transform: translateX(3px) translateY(2px);
+    }
+
+    70% {
+        transform: translateX(-2px);
+    }
+
+    80% {
+        transform: translateX(1px);
+    }
+}
+
+/* Tease toast */
 #tease-toast {
     margin-top: 14px;
     font-size: 1rem;
@@ -154,37 +327,89 @@ h1 {
     transform: translateY(0);
 }
 
+/* Typewriter cursor */
+.typewriter-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background-color: #d63384;
+    margin-left: 2px;
+    animation: cursorBlink 0.6s step-end infinite;
+    vertical-align: text-bottom;
+}
+
+@keyframes cursorBlink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
 /* Music toggle button */
 #music-toggle {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: rgba(255, 255, 255, 0.85);
-    border: none;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 50%;
     width: 52px;
     height: 52px;
     font-size: 1.4rem;
     cursor: pointer;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    transition: transform 0.2s;
+    box-shadow: 0 4px 16px rgba(214, 51, 132, 0.12);
+    transition: transform 0.2s, box-shadow 0.2s;
     z-index: 100;
 }
 
 #music-toggle:hover {
-    transform: scale(1.1);
+    transform: scale(1.12);
+    box-shadow: 0 6px 20px rgba(214, 51, 132, 0.25);
 }
 
-/* Yes page specific */
+/* ========== YES PAGE STYLES ========== */
+
+.yes-container {
+    animation: cardFloat 4s ease-in-out infinite;
+}
+
 .yes-container h1.yes-title {
     font-size: 2.8rem;
-    animation: bounceTitle 0.6s ease infinite alternate;
+    background: linear-gradient(135deg, #d63384, #ff69b4, #ff1493, #d63384);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: bounceTitle 0.6s ease infinite alternate, rainbowText 4s ease infinite;
 }
 
 @keyframes bounceTitle {
-    from { transform: translateY(0) rotate(-1deg); }
-    to { transform: translateY(-12px) rotate(1deg); }
+    from {
+        transform: translateY(0) rotate(-1deg);
+    }
+
+    to {
+        transform: translateY(-12px) rotate(1deg);
+    }
+}
+
+@keyframes rainbowText {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
 .yes-message {
@@ -196,11 +421,132 @@ h1 {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .yes-container #cat-gif {
     width: 260px;
     height: 260px;
+}
+
+/* Love letter section */
+.love-letter {
+    margin-top: 30px;
+    padding: 24px 28px;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    text-align: left;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+    opacity: 0;
+    animation: letterAppear 0.8s ease 1.2s forwards;
+}
+
+@keyframes letterAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.love-letter p {
+    font-size: 1.1rem;
+    color: #d63384;
+    font-weight: 600;
+    line-height: 1.7;
+    min-height: 4rem;
+}
+
+.love-letter .letter-signature {
+    text-align: right;
+    font-style: italic;
+    margin-top: 12px;
+    color: #e91e8c;
+    font-weight: 800;
+    opacity: 0;
+}
+
+.love-letter .letter-signature.visible {
+    animation: fadeIn 0.6s ease forwards;
+}
+
+/* Heart border pulse */
+.heart-border {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    border: 4px solid transparent;
+    animation: heartBorderPulse 2s ease-in-out infinite;
+}
+
+@keyframes heartBorderPulse {
+
+    0%,
+    100% {
+        box-shadow: inset 0 0 30px rgba(255, 105, 180, 0.15);
+    }
+
+    50% {
+        box-shadow: inset 0 0 60px rgba(255, 105, 180, 0.3);
+    }
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+    .container {
+        padding: 32px 20px 28px;
+        border-radius: 22px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    #cat-gif {
+        width: 160px;
+        height: 160px;
+    }
+
+    #yes-btn {
+        font-size: 1.3rem;
+        padding: 14px 35px;
+    }
+
+    .yes-container h1.yes-title {
+        font-size: 2rem;
+    }
+
+    .yes-container #cat-gif {
+        width: 200px;
+        height: 200px;
+    }
+
+    .love-letter {
+        padding: 18px 20px;
+    }
+
+    .love-letter p {
+        font-size: 1rem;
+    }
 }

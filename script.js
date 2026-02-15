@@ -1,3 +1,4 @@
+// ========== GIF & MESSAGE DATA ==========
 const gifStages = [
     "https://media.tenor.com/EBV7OT7ACfwAAAAj/u-u-qua-qua-u-quaa.gif",    // 0 normal
     "https://media1.tenor.com/m/uDugCXK4vI4AAAAd/chiikawa-hachiware.gif",  // 1 confused
@@ -29,7 +30,6 @@ const yesTeasePokes = [
 ]
 
 let yesTeasedCount = 0
-
 let noClickCount = 0
 let runawayEnabled = false
 let musicPlaying = true
@@ -38,14 +38,14 @@ const catGif = document.getElementById('cat-gif')
 const yesBtn = document.getElementById('yes-btn')
 const noBtn = document.getElementById('no-btn')
 const music = document.getElementById('bg-music')
+const container = document.getElementById('main-container')
 
-// Autoplay: audio starts muted (bypasses browser policy), unmute immediately
+// ========== MUSIC AUTOPLAY ==========
 music.muted = true
 music.volume = 0.3
 music.play().then(() => {
     music.muted = false
 }).catch(() => {
-    // Fallback: unmute on first interaction
     document.addEventListener('click', () => {
         music.muted = false
         music.play().catch(() => {})
@@ -65,9 +65,95 @@ function toggleMusic() {
     }
 }
 
+// ========== FLOATING HEARTS CANVAS ==========
+const heartsCanvas = document.getElementById('hearts-canvas')
+const hCtx = heartsCanvas.getContext('2d')
+let hearts = []
+
+function resizeHeartsCanvas() {
+    heartsCanvas.width = window.innerWidth
+    heartsCanvas.height = window.innerHeight
+}
+resizeHeartsCanvas()
+window.addEventListener('resize', resizeHeartsCanvas)
+
+const heartEmojis = ['💕', '💗', '💖', '💝', '💓', '💞', '🩷', '♥️']
+
+function spawnHeart() {
+    hearts.push({
+        x: Math.random() * heartsCanvas.width,
+        y: heartsCanvas.height + 30,
+        speed: 0.4 + Math.random() * 1.2,
+        size: 12 + Math.random() * 20,
+        opacity: 0.15 + Math.random() * 0.35,
+        emoji: heartEmojis[Math.floor(Math.random() * heartEmojis.length)],
+        sway: Math.random() * 2 - 1,
+        swaySpeed: 0.005 + Math.random() * 0.01,
+        angle: Math.random() * Math.PI * 2
+    })
+}
+
+function updateHearts() {
+    hCtx.clearRect(0, 0, heartsCanvas.width, heartsCanvas.height)
+
+    for (let i = hearts.length - 1; i >= 0; i--) {
+        const h = hearts[i]
+        h.y -= h.speed
+        h.angle += h.swaySpeed
+        h.x += Math.sin(h.angle) * h.sway
+
+        hCtx.globalAlpha = h.opacity
+        hCtx.font = `${h.size}px serif`
+        hCtx.fillText(h.emoji, h.x, h.y)
+
+        if (h.y < -40) {
+            hearts.splice(i, 1)
+        }
+    }
+    hCtx.globalAlpha = 1
+    requestAnimationFrame(updateHearts)
+}
+
+// Spawn hearts periodically
+setInterval(spawnHeart, 600)
+// Initial batch
+for (let i = 0; i < 12; i++) {
+    const h = {
+        x: Math.random() * heartsCanvas.width,
+        y: Math.random() * heartsCanvas.height,
+        speed: 0.4 + Math.random() * 1.2,
+        size: 12 + Math.random() * 20,
+        opacity: 0.15 + Math.random() * 0.35,
+        emoji: heartEmojis[Math.floor(Math.random() * heartEmojis.length)],
+        sway: Math.random() * 2 - 1,
+        swaySpeed: 0.005 + Math.random() * 0.01,
+        angle: Math.random() * Math.PI * 2
+    }
+    hearts.push(h)
+}
+updateHearts()
+
+// ========== SPARKLE MOUSE TRAIL ==========
+const sparkleContainer = document.getElementById('sparkle-container')
+const sparkles = ['✨', '💖', '⭐', '💗', '🌟']
+
+document.addEventListener('mousemove', (e) => {
+    if (Math.random() > 0.35) return // throttle sparkles
+
+    const sparkle = document.createElement('span')
+    sparkle.className = 'sparkle'
+    sparkle.textContent = sparkles[Math.floor(Math.random() * sparkles.length)]
+    sparkle.style.left = `${e.clientX + (Math.random() * 20 - 10)}px`
+    sparkle.style.top = `${e.clientY + (Math.random() * 20 - 10)}px`
+    sparkle.style.fontSize = `${10 + Math.random() * 10}px`
+    sparkleContainer.appendChild(sparkle)
+
+    setTimeout(() => sparkle.remove(), 800)
+})
+
+// ========== YES BUTTON HANDLER (TEASE) ==========
 function handleYesClick() {
     if (!runawayEnabled) {
-        // Tease her to try No first
         const msg = yesTeasePokes[Math.min(yesTeasedCount, yesTeasePokes.length - 1)]
         yesTeasedCount++
         showTeaseMessage(msg)
@@ -76,16 +162,46 @@ function handleYesClick() {
     window.location.href = 'yes.html'
 }
 
+// ========== TYPEWRITER TEASE MESSAGE ==========
+let typewriterTimeout = null
+
 function showTeaseMessage(msg) {
-    let toast = document.getElementById('tease-toast')
-    toast.textContent = msg
-    toast.classList.add('show')
+    const toast = document.getElementById('tease-toast')
+
+    // Clear previous
     clearTimeout(toast._timer)
-    toast._timer = setTimeout(() => toast.classList.remove('show'), 2500)
+    clearTimeout(typewriterTimeout)
+    toast.textContent = ''
+    toast.classList.add('show')
+
+    // Typewriter effect
+    let i = 0
+    function typeChar() {
+        if (i < msg.length) {
+            toast.textContent = msg.substring(0, i + 1)
+            i++
+            typewriterTimeout = setTimeout(typeChar, 35)
+        } else {
+            // Add blinking cursor then auto-hide
+            const cursor = document.createElement('span')
+            cursor.className = 'typewriter-cursor'
+            toast.appendChild(cursor)
+            toast._timer = setTimeout(() => {
+                toast.classList.remove('show')
+            }, 2500)
+        }
+    }
+    typeChar()
 }
 
+// ========== NO BUTTON HANDLER ==========
 function handleNoClick() {
     noClickCount++
+
+    // Screen shake
+    container.classList.remove('shake')
+    void container.offsetWidth // force reflow
+    container.classList.add('shake')
 
     // Cycle through guilt-trip messages
     const msgIndex = Math.min(noClickCount, noMessages.length - 1)
@@ -97,6 +213,10 @@ function handleNoClick() {
     const padY = Math.min(18 + noClickCount * 5, 60)
     const padX = Math.min(45 + noClickCount * 10, 120)
     yesBtn.style.padding = `${padY}px ${padX}px`
+
+    // Intensify heartbeat glow based on no clicks
+    const glowIntensity = Math.min(0.45 + noClickCount * 0.1, 1)
+    yesBtn.style.setProperty('--glow', glowIntensity)
 
     // Shrink No button to contrast
     if (noClickCount >= 2) {
@@ -123,6 +243,7 @@ function swapGif(src) {
     }, 200)
 }
 
+// ========== RUNAWAY NO BUTTON ==========
 function enableRunaway() {
     noBtn.addEventListener('mouseover', runAway)
     noBtn.addEventListener('touchstart', runAway, { passive: true })
@@ -142,4 +263,9 @@ function runAway() {
     noBtn.style.left = `${randomX}px`
     noBtn.style.top = `${randomY}px`
     noBtn.style.zIndex = '50'
+
+    // Spin animation
+    noBtn.classList.remove('spinning')
+    void noBtn.offsetWidth
+    noBtn.classList.add('spinning')
 }
